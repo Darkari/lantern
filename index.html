@@ -2,12 +2,12 @@
 <html>
     <title>lantern</title>
     <xmp theme="slate" style="display:none;">
-# Lantern
+        # Lantern
 (analytics was too general a name..)
 
 An orchestration layer for plots and tables, dummy datasets, research, reports, and anything else a data scientist might need.
 
-[![Version](https://img.shields.io/badge/version-0.0.6-lightgrey.svg)](https://img.shields.io/badge/version-0.0.6-lightgrey.svg)
+[![Version](https://img.shields.io/badge/version-0.0.12-lightgrey.svg)](https://img.shields.io/badge/version-0.0.12-lightgrey.svg)
 [![Build Status](https://travis-ci.org/timkpaine/lantern.svg?branch=master)](https://travis-ci.org/timkpaine/lantern)
 [![GitHub issues](https://img.shields.io/github/issues/timkpaine/lantern.svg)]()
 [![Waffle.io](https://badge.waffle.io/timkpaine/lantern.svg?label=ready&title=Ready)](http://waffle.io/timkpaine/lantern)
@@ -16,60 +16,56 @@ An orchestration layer for plots and tables, dummy datasets, research, reports, 
 [![BCH compliance](https://bettercodehub.com/edge/badge/timkpaine/lantern?branch=master)](https://bettercodehub.com/)
 [![PyPI](https://img.shields.io/pypi/v/pylantern.svg)]()
 [![PyPI](https://img.shields.io/pypi/l/pylantern.svg)]()
+[![Docs](https://img.shields.io/readthedocs/pylantern.svg)]()
 [![Beerpay](https://beerpay.io/timkpaine/lantern/badge.svg?style=flat)](https://beerpay.io/timkpaine/lantern)
-[![GitHub](https://img.shields.io/github/watchers/badges/shields.svg?style=social&label=Watch)](https://github.com/timkpaine/lantern)
+[![Site](https://img.shields.io/badge/Site--grey.svg?colorB=FFFFFF)](http://paine.nyc/lantern)
 
-## Plotting
-Abstracts away the nuances of individual charting libraries by providing a single `plot` command with library specific kwarg introspection.
 
-### Dummy data
-![](https://raw.githubusercontent.com/timkpaine/lantern/master/docs/preview.gif)
+## Install
+To install the base package from pip:
 
-### Plot command
-![](https://raw.githubusercontent.com/timkpaine/lantern/master/docs/preview2.gif)
+`pip install pylantern`
 
-## Grids
-The same.
+To Install from source:
 
-## Jupyter Integration
-Single-command code-less exporting for report generation.
-```python
-    import lantern.extensions
-    lantern.extensions.export_pdf('my_notebook.ipynb')  # my_notebook.pdf
-    lantern.extensions.export_html('my_notebook.ipynb') # my_notebook.html
+`make install`
+
+
+To install the JupyterLab extension:
+
+`jupyter labextension install pylantern`
+
+or from source:
+
+`make labextension`
+
+To enable the Jupyter server extension:
+
+`jupyter serverextension enable --py lantern`
+
+
+
+Or run the corresponding commands directly
+
+Lantern relies on JupyterLab extensions:
+
+```
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+jupyter labextension install @jupyterlab/plotly-extension
+jupyter labextension install jupyterlab_bokeh
+jupyter labextension install qgrid
 ```
 
-## Dummy datasets
-- Lines
-- Scatter
-- Scatter3d
-- Bubble
-- Bubble3d
-- Pie
-- Bars
-- Open, high, low, close
-- Open, high, low, close, volume
-- Box
-- Histogram
-- Surface
-- Sinwave
-- Scattergeo
-- Choropleth
-- Stock
-- Regression
-- Blobs
-- Classification
-- Multilabel classification
-- Gaussian
-- Hasti
-- Circles
-- Moons
-- Biclusters
-- S Curve
-- Checker
-- Friedman
-- Friedman 2
-- Friedman 3
+The following are for work in-progress on master:
+
+```
+jupyter labextension install bqplot
+```
+
+
+## Getting Started
+[Read the docs!](http://pylantern.readthedocs.io/en/latest/index.html)
+
 
 ###Contact
 t.paine154@gmail.com
