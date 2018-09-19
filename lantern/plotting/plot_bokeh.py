@@ -4,7 +4,7 @@ from bokeh.plotting import figure, show, output_notebook
 from bokeh.models import Legend, Span
 # from bokeh.models import HoverTool
 from ..utils import in_ipynb
-from .plotobj import BasePlot
+from .plotobj import BasePlotter
 from .plotutils import get_color
 
 
@@ -12,7 +12,7 @@ if in_ipynb():
     output_notebook()
 
 
-class BokehPlot(BasePlot):
+class BokehPlot(BasePlotter):
     def __init__(self, size=None, theme=None):
         size = size or (800, 500)
         self.width = size[0]

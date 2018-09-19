@@ -1,7 +1,7 @@
 import plotly.graph_objs as go
 from matplotlib.colors import to_rgb
 from plotly.graph_objs import FigureWidget
-from .plotobj import BasePlot
+from .plotobj import BasePlotter
 from .plotutils import get_color
 from ..utils import in_ipynb
 
@@ -14,7 +14,7 @@ if in_ipynb():
 # vspan={'x0':'2015-02-15','x1':'2015-03-15','color':'rgba(30,30,30,0.3)','fill':True,'opacity':.4},
 
 
-class PlotlyPlot(BasePlot):
+class PlotlyPlot(BasePlotter):
     def __init__(self, size=None, theme=None):
         self.figures = []
         self.bars = []
@@ -151,7 +151,7 @@ class PlotlyPlot(BasePlot):
         ldata['width'], ldata['height'] = x_size, y_size
         return FigureWidget(data=tdata, layout=ldata)
 
-    def area(self, data, color=None, y_axis='left', stacked=False, subplot=False, **kwargs):
+    def area(self, data, color=None, y_axis='left', stacked=False, subplot='', **kwargs):
         for i, col in enumerate(data):
             c = get_color(i, col, color)
             fig = data[[col]].iplot(fill=True,
@@ -161,7 +161,7 @@ class PlotlyPlot(BasePlot):
                                     **kwargs)
             self.figures.append((col, fig, y_axis, c))
 
-    def bar(self, data, color=None, y_axis='left', stacked=False, subplot=False, **kwargs):
+    def bar(self, data, color=None, y_axis='left', stacked=False, subplot='', **kwargs):
         for i, col in enumerate(data):
             c = get_color(i, col, color)
             fig = data[[col]].iplot(kind='bar',
@@ -172,7 +172,7 @@ class PlotlyPlot(BasePlot):
                                     **kwargs)
             self.figures.append((col, fig, y_axis, c))
 
-    def hist(self, data, color=None, y_axis='left', stacked=False, subplot=False, **kwargs):
+    def hist(self, data, color=None, y_axis='left', stacked=False, subplot='', **kwargs):
         for i, col in enumerate(data):
             c = get_color(i, col, color)
             '''barmode (overlay | group | stack)
@@ -196,7 +196,7 @@ class PlotlyPlot(BasePlot):
     def hspan(self, yhigh, ylow, color=None, **kwargs):
         self.hspans.append((yhigh, ylow, color))
 
-    def line(self, data, color=None, y_axis='left', **kwargs):
+    def line(self, data, color=None, y_axis='left', subplot='', **kwargs):
         for i, col in enumerate(data):
             c = get_color(i, col, color)
             fig = data[[col]].iplot(kind='scatter',
@@ -206,7 +206,7 @@ class PlotlyPlot(BasePlot):
                                     **kwargs)
             self.figures.append((col, fig, y_axis, c))
 
-    def scatter(self, data, color=None, x=None, y=None,  y_axis='left', subplot=False, **kwargs):
+    def scatter(self, data, color=None, x=None, y=None,  y_axis='left', subplot='', **kwargs):
         # Scatter all
         for i, col in enumerate(data):
             if i == 0:
@@ -223,7 +223,7 @@ class PlotlyPlot(BasePlot):
                             **kwargs)])
             self.figures.append((col, fig, y_axis, c))
 
-    def step(self, data, color=None, y_axis='left', subplot=False, **kwargs):
+    def step(self, data, color=None, y_axis='left', subplot='', **kwargs):
         for i, col in enumerate(data):
             c = get_color(i, col, color)
             fig = data[[col]].iplot(kind='scatter',

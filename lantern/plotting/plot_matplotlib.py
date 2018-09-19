@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from .plotobj import BasePlot
+from .plotobj import BasePlotter
 from .plotutils import align_yaxis_np, get_color
 from ..utils import in_ipynb
 
@@ -13,42 +13,24 @@ if in_ipynb():
         ipython.magic("config InlineBackend.figure_format = 'retina'")
 
 
-class MatplotlibPlot(BasePlot):
+class MatplotlibPlot(BasePlotter):
     def __init__(self, size=None, theme=None):
-        size = size or (12, 5)
-        self._figure, self._ax = plt.subplots(figsize=size)
-        self._axes = [self._ax]
-        self._axes_by_side = {'left': [],
-                              'right': [],
-                              'top': [],
-                              'bottom': []}
-        self._axes_by_side['left'].append(self._ax)
-        self._axes_by_side['bottom'].append(self._ax)
-        self._ax.legend_ = None
-        self._ax.get_xaxis().set_label_position("bottom")
-        self._ax.autoscale(True)
+        super(MatplotlibPlot, self).__init__(size, theme)
+        self.size = self.size or (12, 5)
 
-        # store data for legend
-        self._legend = []
-
-        # require all data to be present before plotting
-        self._bars = []
-        self._hists = []
-
-    def _newAx(self, x=False, y=False, y_side='left', color='black'):
-        # axis managemens
-        if not x and not y:
-            return self._ax
-        if x and y:
-            ax = self._ax.twiny()
-            self._axes.append(ax)  # stash and delete superfluous axis later
-            ax = ax.twinx()
-            self._axes_by_side[y_side].append(ax)
-            self._axes_by_side['bottom'].append(ax)
-        elif x:
-            ax = self._ax.twiny()
-            self._axes_by_side['bottom'].append(ax)
-        elif y:
+    def _newAx(self, y_side='left', color='black', subplot=None):
+        # axis management
+        if y == 'left':
+            if subplot == 'x':
+                raise NotImplemented()
+            elif subplot == 'y':
+                self._subplot = self._subplot + 101
+                ax = self._figure.add_subplot(self._subplot)
+                self._axes.append(ax)
+                return ax
+            else:
+                return self._ax
+        else:
             ax = self._ax.twinx()
             self._axes_by_side[y_side].append(ax)
 
@@ -89,18 +71,32 @@ class MatplotlibPlot(BasePlot):
         return ax
 
     def show(self, title='', xlabel='', ylabel='', xaxis=True, yaxis=True, xticks=True, yticks=True, legend=True, grid=True, **kwargs):
-        # require all data to be present before plotting
+        self._figure, self._ax = plt.subplots(figsize=self.size)
+        self._subplot = 111
+
+        self._axes = [self._ax]
+        self._axes_by_side = {'left': [],
+                              'right': [],
+                              'top': [],
+                              'bottom': []}
+        self._axes_by_side['left'].append(self._ax)
+        self._axes_by_side['bottom'].append(self._ax)
+        self._ax.legend_ = None
+        self._ax.get_xaxis().set_label_position("bottom")
+        self._ax.autoscale(True)
+
+        # store data for legend
+        self._legend = []
+
+        self._area()
         self._bar()
         self._hist()
+        self._line()
+        self._scatter()
+        self._step()
 
         lines = []
         labels = []
-        # plt.legend([])
-        # leg = set(ax.legend for ax in self._axes)
-
-        # FIXME these rescale the axis
-        # plt.axhline(0, color='black')
-        # plt.axvline(0, color='black')
 
         to_delete = []
         for ax in self._axes:
@@ -157,7 +153,7 @@ class MatplotlibPlot(BasePlot):
         self._figure.canvas.draw()
         plt.draw()
 
-    def area(self, data, color=None, y_axis='left', stacked=False, **kwargs):
+    def _area(self, data, color=None, y_axis='left', stacked=False,  subplot='', **kwargs):
         for i, col in enumerate(data):
             _color = get_color(i, col, color)
             ax = self._newAx(x=False, y=(y_axis == 'right'), y_side=y_axis, color=_color)
@@ -165,11 +161,11 @@ class MatplotlibPlot(BasePlot):
             ax.fill_between(data.index, data[col], alpha=.7, color=_color)
             self._legend.append((col, x[0], y_axis))
 
-    def bar(self, data, color=None, y_axis='left', stacked=False, **kwargs):
+    def _bar(self, data, color=None, y_axis='left', stacked=False,  subplot='', **kwargs):
         for i, col in enumerate(data):
             self._bars.append((data[[col]], get_color(i, col, color), y_axis, stacked, kwargs))
 
-    def _bar(self):
+    def _barinternal(self):
         if not self._bars:
             return
         data = []
@@ -210,7 +206,7 @@ class MatplotlibPlot(BasePlot):
                     self._legend.append((col, x, d[2]))
                     count += 1
 
-    def _hist(self):
+    def _histinternal(self):
         if not self._hists:
             return
         data = []
@@ -231,49 +227,44 @@ class MatplotlibPlot(BasePlot):
         ax = self._newAx(x=False, y=(y_axis == 'right'), y_side=y_axis, color=color)
         df.plot(kind='hist', alpha=.5, ax=ax, color=colors, stacked=stackedes[-1], **kwargses[-1])
 
-    def hist(self, data, color=None, y_axis='left', stacked=False, **kwargs):
+    def _hist(self, data, color=None, y_axis='left', stacked=False,  subplot='', **kwargs):
         for i, col in enumerate(data):
             self._hists.append((data[[col]], get_color(i, col, color), y_axis, stacked, kwargs))
 
-    def hline(self, y, color=None, **kwargs):
+    def _hline(self, y, color=None, **kwargs):
         ax = self._newAx(x=False, y=False)
         color = color or get_color(None, None, None)
         ax.axhline(y, color=color, **kwargs)
 
-    def hspan(self, yhigh, ylow, color=None, **kwargs):
+    def _hspan(self, yhigh, ylow, color=None, **kwargs):
         ax = self._newAx(x=False, y=False)
         color = color or get_color(None, None, None)
         ax.axhspan(ymin=ylow, ymax=yhigh, color=color, **kwargs)
 
-    def line(self, data, color=None, y_axis='left', **kwargs):
+    def _line(self, data, color=None, y_axis='left',  subplot='', **kwargs):
         for i, col in enumerate(data):
             _color = get_color(i, col, color)
-            ax = self._newAx(x=False, y=(y_axis == 'right'), y_side=y_axis, color=_color)
+            ax = self._newAx(x=False, y=(y_axis == 'right'), y_side=y_axis, color=_color, subplot=subplot)
             x = ax.plot(data.index, data[col], color=_color, **kwargs)
             self._legend.append((col, x[0], y_axis))
 
-    def scatter(self, data, color=None, x=None, y=None,  y_axis='left', **kwargs):
-        for i, col in enumerate(data):
-            if i == 0:
-                continue  # don't scatter against self
-            x = data.columns[0]
-            y = data.columns[i]
-            c = get_color(i, col, color)
-            plt.plot(data[x], data[y], marker='.', linewidth=0, color=c, label='%s vs %s' % (x, y))
+    def _scatter(self):
+        for scatter in self.scatter:
+            ax = self._newAx(scatter.y_axis, scatter.color, scatter.subplot)
+            plt.plot(scatter.x, scatter.y, marker='.', linewidth=0, color=scatter.color, label='%s vs %s' % (scatter.x.name, scatter.y.name), ax=ax)
 
-    def step(self, data, color=None, y_axis='left', **kwargs):
-        for i, col in enumerate(data):
-            _color = get_color(i, col, color)
-            ax = self._newAx(x=False, y=(y_axis == 'right'), y_side=y_axis, color=_color)
+    def _step(self):
+        for step in self.step:
+            ax = self._newAx(step.y_axis, step.color, step.subplot)
             x = ax.plot(data.index, data[col], drawstyle='steps', color=_color, **kwargs)
             self._legend.append((col, x[0], y_axis))
 
-    def vline(self, x, color=None, **kwargs):
+    def _vline(self, x, color=None, **kwargs):
         ax = self._newAx(x=False, y=False)
         _color = color or get_color(None, None, None)
         ax.axvline(x, color=_color, **kwargs)
 
-    def vspan(self, xhigh, xlow, color=None, **kwargs):
+    def _vspan(self, xhigh, xlow, color=None, **kwargs):
         ax = self._newAx(x=False, y=False)
         _color = color or get_color(None, None, None)
         ax.axvspan(xmin=xlow, xmax=xhigh, color=_color, **kwargs)
